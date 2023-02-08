@@ -7,10 +7,15 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import { configureChains, createClient, getAccount } from '@wagmi/core'
 import { goerli, mainnet } from '@wagmi/core/chains'
 import { EthereumClient, modalConnectors, walletConnectProvider } from '@web3modal/ethereum'
 import { Web3Modal } from '@web3modal/html'
+
+Vue.config.ignoredElements = [
+  'w3m-core-button'
+]
 
 export default {
   name: 'IndexPage',
