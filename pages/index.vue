@@ -1,83 +1,47 @@
 <template>
-  <v-row justify="center" align="center">
-    <v-col cols="12" sm="8" md="6">
-      <v-card class="logo py-4 d-flex justify-center">
-        <NuxtLogo />
-        <VuetifyLogo />
-      </v-card>
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>Vuetify is a progressive Material Design component framework for Vue.js. It was designed to empower developers to create amazing applications.</p>
-          <p>
-            For more information on Vuetify, check out the <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              documentation
-            </a>.
-          </p>
-          <p>
-            If you have questions, please join the official <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="chat"
-            >
-              discord
-            </a>.
-          </p>
-          <p>
-            Find a bug? Report it on the github <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="contribute"
-            >
-              issue board
-            </a>.
-          </p>
-          <p>Thank you for developing with Vuetify and I look forward to bringing more exciting features in the future.</p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
-          </div>
-          <hr class="my-3">
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt Documentation
-          </a>
-          <br>
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="primary"
-            nuxt
-            to="/inspire"
-          >
-            Continue
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-col>
-  </v-row>
+  <div>
+    <client-only>
+      <w3m-core-button />
+    </client-only>
+  </div>
 </template>
 
 <script>
+import { configureChains, createClient, getAccount } from '@wagmi/core'
+import { goerli, mainnet } from '@wagmi/core/chains'
+import { EthereumClient, modalConnectors, walletConnectProvider } from '@web3modal/ethereum'
+import { Web3Modal } from '@web3modal/html'
+
 export default {
-  name: 'IndexPage'
+  name: 'IndexPage',
+  mounted () {
+    // define constants
+    const projectId = '5b71f5ba1a93e7ee227d6f2f023b946d'
+    const chains = [mainnet, goerli]
+
+    // configure wagmi client
+    const { provider } = configureChains(chains, [walletConnectProvider({ projectId })])
+    const wagmiClient = createClient({
+      autoConnect: true,
+      connectors: [
+        ...modalConnectors({ appName: 'web3Modal', chains })
+      ],
+      provider
+    })
+
+    // create ethereum and modal clients
+    const ethereumClient = new EthereumClient(wagmiClient, chains)
+    const web3Modal = new Web3Modal(
+      {
+        projectId
+      },
+      ethereumClient
+    )
+
+    web3Modal.subscribeModal(({ open }) => {
+      const account = getAccount()
+      console.log(account)
+    })
+  }
 }
 </script>
